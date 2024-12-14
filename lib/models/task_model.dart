@@ -54,7 +54,7 @@ class Task {
       repeatInterval: map['repeat_interval'],
       gpsLocation: map['gps_location'],
       taskColor: map['task_color'],
-      status: map['status'] != null ? map['status'] : 1,
+      status: map['status'] ?? 1,
     );
   }
 }

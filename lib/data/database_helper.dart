@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:first_application/models/task_model.dart';
 import 'package:first_application/models/profile_model.dart';
+import 'package:first_application/models/folder_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance =
@@ -12,7 +13,7 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('todo_test3.db');
+    _database = await _initDB('todo_test4.db');
     return _database!;
   }
 
@@ -29,19 +30,18 @@ class DatabaseHelper {
       user_id INTEGER NOT NULL UNIQUE,
       username TEXT,
       email TEXT,
-      rating INTEGER,
-      succesful_tasks INTEGER,
-      average_tasks_per_day INTEGER,
+      rating INTEGER NOT NULL DEFAULT 0,
+      succesful_tasks INTEGER NOT NULL DEFAULT 0,
+      average_tasks_per_day INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY(user_id)
     )
     ''');
 
     await db.execute('''
     CREATE TABLE IF NOT EXISTS folders (
-      folder_id INTEGER NOT NULL UNIQUE,
+      folder_id INTEGER PRIMARY KEY AUTOINCREMENT,
       folder_name TEXT NOT NULL,
-      folder_color TEXT,
-      PRIMARY KEY(folder_id)
+      folder_color TEXT NOT NULL DEFAULT 'Blue'
     )
     ''');
 
@@ -80,6 +80,17 @@ class DatabaseHelper {
       'succesful_tasks': 0,
       'average_tasks_per_day': 0,
     });
+
+    await db.insert('folders', {
+      'folder_id': 1,
+      'folder_name': 'None',
+      'folder_color': 'Blue',
+    });
+  }
+
+  Future close() async {
+    final db = await instance.database;
+    db.close();
   }
 
   // --------------------------------------- Task -----------------------------------------------
@@ -146,8 +157,43 @@ class DatabaseHelper {
     }
   }
 
-  Future close() async {
-    final db = await instance.database;
-    db.close();
+// --------------------------------------- Folder -----------------------------------------------
+
+Future<int> insertFolder(Folder folder) async {
+    try {
+      final db = await instance.database;
+      return await db.insert('folders', folder.toMap());
+    } catch (e) {
+      print('Error inserting folder: $e');
+      return -1;
+    }
   }
+
+  Future<List<Folder>> getFolders() async {
+    final db = await instance.database;
+    final result = await db.query('folders');
+    return result.map((json) => Folder.fromMap(json)).toList();
+  }
+
+  Future<int> updateFolder(Folder folder) async {
+    try {
+      final db = await instance.database;
+      return await db.update('folders', folder.toMap(),
+          where: 'folder_id = ?', whereArgs: [folder.folderId]);
+    } catch (e) {
+      print('Error updating folder: $e');
+      return -1;
+    }
+  }
+
+  Future<int> deleteFolder(int id) async {
+    try {
+      final db = await instance.database;
+      return await db.delete('folders', where: 'folder_id = ?', whereArgs: [id]);
+    } catch (e) {
+      print('Error deleting folder: $e');
+      return -1;
+    }
+  }
+
 }
