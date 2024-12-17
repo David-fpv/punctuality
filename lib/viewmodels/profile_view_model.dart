@@ -9,17 +9,17 @@ class ProfileViewModel extends ChangeNotifier {
   Profile? get profile => _profile;
 
   Future<void> loadProfile() async {
-    _profile = await DatabaseHelper.instance.getProfile();
+    _profile = await DatabaseHelper.database_punctuality.getProfile();
     notifyListeners();
   }
 
   Future<void> updateProfile(Profile profile) async {
-    await DatabaseHelper.instance.updateProfile(profile);
+    await DatabaseHelper.database_punctuality.updateProfile(profile);
     await loadProfile(); // Обновляем список задач после изменения
   }
 
   Future<void> deleteTask(Profile profile) async {
-    await DatabaseHelper.instance.deleteTask(profile.userId);
+    await DatabaseHelper.database_punctuality.deleteTask(profile.userId);
     await loadProfile(); // Обновляем список задач после изменения
   }
 }

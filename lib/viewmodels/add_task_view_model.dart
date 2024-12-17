@@ -6,9 +6,10 @@ import 'package:first_application/data/database_helper.dart';
 class AddTaskViewModel extends ChangeNotifier {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  
+
   String selectedTitle = '';
   String selectedDescription = '';
+  int selectedFolderId = 0;
   String selectedFolder = 'None';
   int? selectedPriority = 0;
   DateTime? selectedDeadline;
@@ -18,9 +19,30 @@ class AddTaskViewModel extends ChangeNotifier {
   TaskStyle? selectedTaskStyle = TaskStyle(
     backgroundColor: Colors.white,
     textColor: Colors.black,
-    borderColor: Colors.grey, 
+    borderColor: Colors.grey,
   );
   int selectedStatus = 0;
+
+  AddTaskViewModel({Task? task}) {
+    if (task != null) {
+      titleController.text = task.title;
+      descriptionController.text = task.description.toString();
+      selectedFolderId = task.folderId;
+      selectedPriority = task.priority;
+      selectedDeadline = task.deadline;
+      selectedReminder = task.reminderTime;
+      selectedRepeatInterval = task.repeatInterval;
+      selectedGpsLocation = task.gpsLocation;
+      selectedTaskStyle = TaskStyle(
+        backgroundColor: task.taskColor != null
+            ? Color(int.parse(task.taskColor!))
+            : Colors.white,
+        textColor: Colors.black,
+        borderColor: Colors.grey,
+      );
+      selectedStatus = task.status;
+    }
+  }
 
   void setFolder(String folder) {
     selectedFolder = folder;
@@ -65,7 +87,7 @@ class AddTaskViewModel extends ChangeNotifier {
   Task createTask() {
     return Task(
       id: 1, // SQLite будет автоматически присваивать ID
-      folderId: 0, // Нужно будет установить правильный folderId
+      folderId: 1, // Нужно будет установить правильный folderId
       title: titleController.text,
       description: descriptionController.text,
       priority: selectedPriority,
@@ -81,7 +103,7 @@ class AddTaskViewModel extends ChangeNotifier {
   Future<void> saveTask() async {
     if (titleController.text.isNotEmpty && selectedFolder.isNotEmpty) {
       Task newTask = createTask();
-      await DatabaseHelper.instance.insertTask(newTask);
+      await DatabaseHelper.database_punctuality.insertTask(newTask);
       print('Task created');
       notifyListeners();
     } else {
@@ -91,7 +113,7 @@ class AddTaskViewModel extends ChangeNotifier {
 
   Future<void> updateTask(Task task) async {
     if (titleController.text.isNotEmpty && selectedFolder.isNotEmpty) {
-      await DatabaseHelper.instance.updateTask(task);
+      await DatabaseHelper.database_punctuality.updateTask(task);
       print('Task updated');
       notifyListeners();
     } else {

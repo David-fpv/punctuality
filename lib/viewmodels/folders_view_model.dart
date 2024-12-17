@@ -16,33 +16,32 @@ class FoldersViewModel extends ChangeNotifier {
   }
 
   Future<void> loadFolders() async {
-    _folders = await DatabaseHelper.instance.getFolders();
+    _folders = await DatabaseHelper.database_punctuality.getFolders();
     notifyListeners();
   }
 
-  Future<void> updateTask(Folder folder) async {
-    await DatabaseHelper.instance.updateFolder(folder);
+  Future<void> updateFolder(Folder folder) async {
+    await DatabaseHelper.database_punctuality.updateFolder(folder);
     await loadFolders(); // Обновляем список задач после изменения
   }
 
   Future<void> addFolder(String name, String color) async {
     if (name != '') {
       Folder newFolder = createFolder(name, color);
-      await DatabaseHelper.instance.insertFolder(newFolder);
+      await DatabaseHelper.database_punctuality.insertFolder(newFolder);
       print('Folder created');
-      notifyListeners();
+      await loadFolders(); // Обновляем список папок после добавления
     } else {
       print("Folder didn't create");
     }
   }
 
-  Future<void> deleteTask(Folder folder) async {
-    if (folder.folderId == 1)
-    {
+  Future<void> deleteFolder(Folder folder) async {
+    if (folder.folderId == 1) {
       print('The first (base) folder cannot be deleted');
       return;
     }
-    await DatabaseHelper.instance.deleteFolder(folder.folderId);
+    await DatabaseHelper.database_punctuality.deleteFolder(folder.folderId);
     await loadFolders(); // Обновляем список задач после изменения
   }
 }

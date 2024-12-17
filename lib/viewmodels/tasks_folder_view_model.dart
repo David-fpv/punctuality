@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:first_application/models/folder_model.dart';
 import 'package:first_application/models/task_model.dart';
 import 'package:first_application/data/database_helper.dart';
 
-class TodayTaskViewModel extends ChangeNotifier {
+class TasksFolderViewModel extends ChangeNotifier {
+  final Folder folder;
   List<Task> _tasks = [];
 
   List<Task> get tasks => _tasks;
 
+  TasksFolderViewModel({required this.folder}) {
+    loadTasks();
+  }
+
   Future<void> loadTasks() async {
-    _tasks = await DatabaseHelper.database_punctuality.getTasks();
+    _tasks = await DatabaseHelper.database_punctuality.getTasksByFolderName(folder.folderName);
     notifyListeners();
   }
 

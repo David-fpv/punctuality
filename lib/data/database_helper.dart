@@ -5,8 +5,7 @@ import 'package:first_application/models/profile_model.dart';
 import 'package:first_application/models/folder_model.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper instance =
-      DatabaseHelper._init(); // переименновать instance!!!!!
+  static final DatabaseHelper database_punctuality = DatabaseHelper._init();
   static Database? _database;
 
   DatabaseHelper._init();
@@ -89,7 +88,7 @@ class DatabaseHelper {
   }
 
   Future close() async {
-    final db = await instance.database;
+    final db = await database_punctuality.database;
     db.close();
   }
 
@@ -97,7 +96,7 @@ class DatabaseHelper {
 
   Future<int> insertTask(Task task) async {
     try {
-      final db = await instance.database;
+      final db = await database_punctuality.database;
       return await db.insert('tasks', task.toMap());
     } catch (e) {
       print('Error inserting task: $e');
@@ -106,14 +105,24 @@ class DatabaseHelper {
   }
 
   Future<List<Task>> getTasks() async {
-    final db = await instance.database;
+    final db = await database_punctuality.database;
     final result = await db.query('tasks');
+    return result.map((json) => Task.fromMap(json)).toList();
+  }
+
+  Future<List<Task>> getTasksByFolderName(String folderName) async {
+    final db = await database_punctuality.database;
+
+    final result = await db.rawQuery(
+        ''' SELECT tasks.* FROM tasks JOIN folders ON tasks.folder_id = folders.folder_id WHERE folders.folder_name = ? ''',
+        [folderName]);
+
     return result.map((json) => Task.fromMap(json)).toList();
   }
 
   Future<int> updateTask(Task task) async {
     try {
-      final db = await instance.database;
+      final db = await database_punctuality.database;
       return await db.update('tasks', task.toMap(),
           where: 'task_id = ?', whereArgs: [task.id]);
     } catch (e) {
@@ -124,7 +133,7 @@ class DatabaseHelper {
 
   Future<int> deleteTask(int id) async {
     try {
-      final db = await instance.database;
+      final db = await database_punctuality.database;
       return await db.delete('tasks', where: 'task_id = ?', whereArgs: [id]);
     } catch (e) {
       print('Error deleting task: $e');
@@ -135,7 +144,7 @@ class DatabaseHelper {
 // --------------------------------------- Profile -----------------------------------------------
 
   Future<Profile?> getProfile() async {
-    final db = await instance.database;
+    final db = await database_punctuality.database;
     final result = await db.query('users');
     if (result.isNotEmpty) {
       print('Profile found: ${result.first}');
@@ -148,7 +157,7 @@ class DatabaseHelper {
 
   Future<int> updateProfile(Profile profile) async {
     try {
-      final db = await instance.database;
+      final db = await database_punctuality.database;
       return await db.update('users', profile.toMap(),
           where: 'user_id = ?', whereArgs: [profile.userId]);
     } catch (e) {
@@ -159,9 +168,9 @@ class DatabaseHelper {
 
 // --------------------------------------- Folder -----------------------------------------------
 
-Future<int> insertFolder(Folder folder) async {
+  Future<int> insertFolder(Folder folder) async {
     try {
-      final db = await instance.database;
+      final db = await database_punctuality.database;
       return await db.insert('folders', folder.toMap());
     } catch (e) {
       print('Error inserting folder: $e');
@@ -170,14 +179,14 @@ Future<int> insertFolder(Folder folder) async {
   }
 
   Future<List<Folder>> getFolders() async {
-    final db = await instance.database;
+    final db = await database_punctuality.database;
     final result = await db.query('folders');
     return result.map((json) => Folder.fromMap(json)).toList();
   }
 
   Future<int> updateFolder(Folder folder) async {
     try {
-      final db = await instance.database;
+      final db = await database_punctuality.database;
       return await db.update('folders', folder.toMap(),
           where: 'folder_id = ?', whereArgs: [folder.folderId]);
     } catch (e) {
@@ -188,12 +197,12 @@ Future<int> insertFolder(Folder folder) async {
 
   Future<int> deleteFolder(int id) async {
     try {
-      final db = await instance.database;
-      return await db.delete('folders', where: 'folder_id = ?', whereArgs: [id]);
+      final db = await database_punctuality.database;
+      return await db
+          .delete('folders', where: 'folder_id = ?', whereArgs: [id]);
     } catch (e) {
       print('Error deleting folder: $e');
       return -1;
     }
   }
-
 }
