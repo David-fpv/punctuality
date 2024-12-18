@@ -4,8 +4,8 @@ import 'package:first_application/themes/task_style.dart';
 import 'package:first_application/data/database_helper.dart';
 import 'package:path/path.dart';
 
-class AddTaskViewModel extends ChangeNotifier {
-  Task? currentTask;
+class TaskViewModel extends ChangeNotifier {
+  late Task currentTask;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
@@ -21,32 +21,18 @@ class AddTaskViewModel extends ChangeNotifier {
   String? selectedTaskColor = "Blue";
   int selectedStatus = 0;
 
-  AddTaskViewModel({Task? task}) {
-    if (task != null) {
-      titleController.text = task.title;
-      descriptionController.text = task.description.toString();
-      selectedFolderId = task.folderId;
-      selectedPriority = task.priority;
-      selectedDeadline = task.deadline;
-      selectedReminder = task.reminderTime;
-      selectedRepeatInterval = task.repeatInterval;
-      selectedGpsLocation = task.gpsLocation;
-      selectedTaskColor = task.taskColor;
-      selectedStatus = task.status;
-      currentTask = task;
-    }
-  }
-
-  void setToTodayTasks(bool? value) {
-    if (value != null) {
-      if (value) {
-        selectedStatus += 2;
-      } else {
-        selectedStatus -= 2;
-      }
-      print('Task add to TaskToday. SelectedStatus = $selectedStatus');
-      notifyListeners();
-    }
+  TaskViewModel({required Task task}) {
+    titleController.text = task.title;
+    descriptionController.text = task.description.toString();
+    selectedFolderId = task.folderId;
+    selectedPriority = task.priority;
+    selectedDeadline = task.deadline;
+    selectedReminder = task.reminderTime;
+    selectedRepeatInterval = task.repeatInterval;
+    selectedGpsLocation = task.gpsLocation;
+    selectedTaskColor = task.taskColor;
+    selectedStatus = task.status;
+    currentTask = task;
   }
 
   void setFolder(String folder) {
@@ -84,6 +70,11 @@ class AddTaskViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setStatus(int status) {
+    selectedStatus = status;
+    notifyListeners();
+  }
+
   Task createTask() {
     return Task(
       id: 1, // SQLite автоматически присваивает ID
@@ -101,21 +92,19 @@ class AddTaskViewModel extends ChangeNotifier {
   }
 
   void updateLocalCurrentTask() {
-    if (currentTask != null) {
-      currentTask = Task(
-        id: currentTask!.id,
-        folderId: currentTask!.folderId,
-        title: titleController.text,
-        description: descriptionController.text,
-        priority: selectedPriority,
-        deadline: selectedDeadline,
-        reminderTime: selectedReminder,
-        repeatInterval: selectedRepeatInterval,
-        gpsLocation: selectedGpsLocation,
-        taskColor: selectedTaskColor,
-        status: selectedStatus,
-      );
-    }
+    currentTask = Task(
+      id: currentTask!.id,
+      folderId: currentTask!.folderId,
+      title: titleController.text,
+      description: descriptionController.text,
+      priority: selectedPriority,
+      deadline: selectedDeadline,
+      reminderTime: selectedReminder,
+      repeatInterval: selectedRepeatInterval,
+      gpsLocation: selectedGpsLocation,
+      taskColor: selectedTaskColor,
+      status: selectedStatus,
+    );
   }
 
   Future<void> saveTask() async {
@@ -130,9 +119,7 @@ class AddTaskViewModel extends ChangeNotifier {
   }
 
   Future<void> updateTask() async {
-    if (titleController.text.isNotEmpty &&
-        selectedFolder.isNotEmpty &&
-        currentTask != null) {
+    if (titleController.text.isNotEmpty && selectedFolder.isNotEmpty && currentTask != null) {
       updateLocalCurrentTask();
       await DatabaseHelper.database_punctuality.updateTask(currentTask!);
       print('Task updated');

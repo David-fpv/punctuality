@@ -37,6 +37,7 @@ class TasksFolderScreen extends StatelessWidget {
                         builder: (context) => AddTask(task: task),
                       ),
                     );
+                    viewModel.loadTasks();
                   },
                   onLongPress: () {
                     viewModel.deleteTask(task);

@@ -8,7 +8,7 @@ class TodayTaskViewModel extends ChangeNotifier {
   List<Task> get tasks => _tasks;
 
   Future<void> loadTasks() async {
-    _tasks = await DatabaseHelper.database_punctuality.getTasks();
+    _tasks = await DatabaseHelper.database_punctuality.getTodayTasks();
     notifyListeners();
   }
 

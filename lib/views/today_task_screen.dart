@@ -1,3 +1,4 @@
+import 'package:first_application/views/add_task_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:first_application/viewmodels/today_task_view_model.dart';
@@ -24,6 +25,14 @@ class TodayTask extends StatelessWidget {
                 return ListTile(
                   title: Text(task.title),
                   subtitle: Text(task.description ?? ''),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddTask(task: task),
+                      ),
+                    );
+                  },
                   onLongPress: () {
                     viewModel.deleteTask(task);
                   },

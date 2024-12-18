@@ -1,4 +1,5 @@
 import 'package:first_application/models/task_model.dart';
+import 'package:first_application/views/setting_label.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:first_application/viewmodels/add_task_view_model.dart';
@@ -10,17 +11,15 @@ class AddTask extends StatelessWidget {
   const AddTask({Key? key, this.task}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AddTaskViewModel(task: task),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(task == null ? 'Add Task' : 'Edit Task'),
-          backgroundColor: Colors.white,
-        ),
-        body: Consumer<AddTaskViewModel>(
-          builder: (context, viewModel, child) {
-            return Padding( 
+  Widget build(BuildContext context) => ChangeNotifierProvider(
+        create: (_) => AddTaskViewModel(task: task),
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(task == null ? 'Add Task' : 'Viewing Task'),
+            backgroundColor: Colors.white,
+          ),
+          body: Consumer<AddTaskViewModel>(
+            builder: (context, viewModel, child) => Padding(
               padding: const EdgeInsets.all(16.0),
               child: ListView(
                 children: [
@@ -36,33 +35,30 @@ class AddTask extends StatelessWidget {
                   SizedBox(height: 16.0),
                   Row(
                     children: [
-                      Container(
-                        width: 150,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .primaryColor, // Использование цвета темы
-                          borderRadius:
-                              BorderRadius.circular(16), // Закругленные края
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Категории',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
+                      SettingLabel(title: 'Today'),
+                      Checkbox(
+                        value: viewModel.selectedStatus >= 2 ? true : false,
+                        onChanged: (bool? value) {
+                          viewModel.setToTodayTasks(value);
+                        },
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 16.0),
+                  Row(
+                    children: [
+                      SettingLabel(title: 'Сategories'),
                       SizedBox(
                         width: 20,
                       ),
                       DropdownButton<String>(
                         value: viewModel.selectedFolder,
-                        items: ['None', 'Family', 'Job'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
+                        items: ['None', 'Family', 'Job']
+                            .map((String value) => DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                ))
+                            .toList(),
                         onChanged: (String? newValue) {
                           viewModel.setFolder(newValue!);
                         },
@@ -72,37 +68,22 @@ class AddTask extends StatelessWidget {
                   SizedBox(height: 16.0),
                   Row(
                     children: [
-                      Container(
-                        width: 150,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .primaryColor, // Использование цвета темы
-                          borderRadius:
-                              BorderRadius.circular(16), // Закругленные края
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Приоритет',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
+                      SettingLabel(title: 'Priority'),
                       SizedBox(
                         width: 20,
                       ),
                       DropdownButton<int>(
                         value: viewModel.selectedPriority,
-                        items: [0, 1, 2].map((int value) {
-                          return DropdownMenuItem<int>(
-                            value: value,
-                            child: Text(value == 0
-                                ? 'Low'
-                                : value == 1
-                                    ? 'Medium'
-                                    : 'High'),
-                          );
-                        }).toList(),
+                        items: [0, 1, 2]
+                            .map((int value) => DropdownMenuItem<int>(
+                                  value: value,
+                                  child: Text(value == 0
+                                      ? 'Low'
+                                      : value == 1
+                                          ? 'Medium'
+                                          : 'High'),
+                                ))
+                            .toList(),
                         onChanged: (int? newValue) {
                           viewModel.setPriority(newValue!);
                         },
@@ -149,7 +130,7 @@ class AddTask extends StatelessWidget {
                         ),
                         child: Center(
                           child: Text(
-                            'Повтор',
+                            'Replay',
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
@@ -186,16 +167,19 @@ class AddTask extends StatelessWidget {
                   SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: () {
-                      viewModel.saveTask();
+                      if (task == null) {
+                        viewModel.saveTask();
+                      } else {
+                        viewModel.updateTask();
+                        Navigator.pop(context);
+                      }
                     },
-                    child: Text('Add Task'),
+                    child: Text(task == null ? 'Add Task' : 'Update Task'),
                   ),
                 ],
               ),
-            );
-          },
+            ),
+          ),
         ),
-      ),
-    );
-  }
+      );
 }

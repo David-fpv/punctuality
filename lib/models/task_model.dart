@@ -1,5 +1,3 @@
-import 'package:first_application/themes/task_style.dart';
-
 class Task {
   final int id;
   final int folderId;

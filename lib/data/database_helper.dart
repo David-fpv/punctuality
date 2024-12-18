@@ -110,6 +110,19 @@ class DatabaseHelper {
     return result.map((json) => Task.fromMap(json)).toList();
   }
 
+  Future<List<Task>> getTodayTasks() async {
+    final db = await database_punctuality.database;
+    final result = await db.query('tasks');
+    List<Task> allTasks = result.map((json) => Task.fromMap(json)).toList();
+    for(int i = 0; i < allTasks.length; i++)
+    {
+      if (allTasks[i].status < 2) {
+        allTasks.removeAt(i);
+      }
+    }
+    return allTasks;
+  }
+
   Future<List<Task>> getTasksByFolderName(String folderName) async {
     final db = await database_punctuality.database;
 
